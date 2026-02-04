@@ -1,0 +1,47 @@
+name: Build and Upload
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  PUB_ENVIRONMENT: bot.github
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            dart_sdk: 3.9.0
+            artifact_name: format-linux
+            exe_suffix: ""
+          - os: macos-latest
+            dart_sdk: 3.9.0
+            artifact_name: format-macos
+            exe_suffix: ""
+          - os: windows-latest
+            dart_sdk: 3.9.0
+            artifact_name: format-windows.exe
+            exe_suffix: ".exe"
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      - uses: dart-lang/setup-dart@e51d8e571e22473a2ddebf0ef8a2123f0ab2c02c
+        with:
+          sdk: ${{ matrix.dart_sdk }}
+      - name: Install dependencies
+        run: dart pub get
+      - name: Compile executable
+        run: dart compile exe bin/format.dart -o format${{ matrix.exe_suffix }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@654c2827b4986b92d6339faa21949e8b06cf9384
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: format${{ matrix.exe_suffix }}
+          if-no-files-found: error
