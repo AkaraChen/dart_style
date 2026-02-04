@@ -49,13 +49,18 @@ jobs:
             artifact_name: format-windows-i686-msvc
             exe_suffix: ".exe"
             target: i686-pc-windows-msvc
+          - os: windows-latest
+            dart_sdk: 3.9.0
+            artifact_name: format-windows-aarch64-msvc
+            exe_suffix: ".exe"
+            target: aarch64-pc-windows-msvc
           - os: ubuntu-latest
             dart_sdk: 3.9.0
             artifact_name: format-windows-x86_64-gnu
             exe_suffix: ".exe"
             target: x86_64-pc-windows-gnu
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      - uses: actions/checkout@v4
       - uses: dart-lang/setup-dart@e51d8e571e22473a2ddebf0ef8a2123f0ab2c02c
         with:
           sdk: ${{ matrix.dart_sdk }}
@@ -68,113 +73,5 @@ jobs:
         with:
           name: ${{ matrix.artifact_name }}
           path: format${{ matrix.exe_suffix }}
-          if-no-files-found: error
-          retention-days: 90
-
-  build-rust:
-    name: Rust ${{ matrix.target }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-            artifact_name: rust-format-linux-x86_64
-            use_cross: false
-          - os: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
-            artifact_name: rust-format-linux-aarch64
-            use_cross: true
-          - os: ubuntu-latest
-            target: armv7-unknown-linux-gnueabihf
-            artifact_name: rust-format-linux-armv7
-            use_cross: true
-          - os: ubuntu-latest
-            target: riscv64gc-unknown-linux-gnu
-            artifact_name: rust-format-linux-riscv64
-            use_cross: true
-          - os: ubuntu-latest
-            target: powerpc64le-unknown-linux-gnu
-            artifact_name: rust-format-linux-ppc64le
-            use_cross: true
-          - os: macos-latest
-            target: x86_64-apple-darwin
-            artifact_name: rust-format-macos-x86_64
-            use_cross: false
-          - os: macos-13
-            target: x86_64-apple-darwin
-            artifact_name: rust-format-macos-x86_64-12
-            use_cross: false
-          - os: macos-latest
-            target: aarch64-apple-darwin
-            artifact_name: rust-format-macos-aarch64
-            use_cross: false
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-            artifact_name: rust-format-windows-x86_64-msvc
-            use_cross: false
-            exe_suffix: ".exe"
-          - os: windows-latest
-            target: i686-pc-windows-msvc
-            artifact_name: rust-format-windows-i686-msvc
-            use_cross: false
-            exe_suffix: ".exe"
-          - os: windows-latest
-            target: aarch64-pc-windows-msvc
-            artifact_name: rust-format-windows-aarch64-msvc
-            use_cross: false
-            exe_suffix: ".exe"
-          - os: ubuntu-latest
-            target: x86_64-pc-windows-gnu
-            artifact_name: rust-format-windows-x86_64-gnu
-            use_cross: false
-            exe_suffix: ".exe"
-          - os: ubuntu-latest
-            target: i686-pc-windows-gnu
-            artifact_name: rust-format-windows-i686-gnu
-            use_cross: false
-            exe_suffix: ".exe"
-          - os: ubuntu-latest
-            target: aarch64-pc-windows-gnu
-            artifact_name: rust-format-windows-aarch64-gnu
-            use_cross: false
-            exe_suffix: ".exe"
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-            artifact_name: rust-format-linux-x86_64-musl
-            use_cross: false
-          - os: ubuntu-latest
-            target: aarch64-unknown-linux-musl
-            artifact_name: rust-format-linux-aarch64-musl
-            use_cross: true
-    steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          target: ${{ matrix.target }}
-          override: true
-      - name: Install cross
-        if: matrix.use_cross
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cross
-      - name: Build Rust library
-        working-directory: rust
-        run: |
-          if [ "${{ matrix.use_cross }}" = "true" ]; then
-            cross build --release --target ${{ matrix.target }}
-          else
-            cargo build --release --target ${{ matrix.target }}
-          fi
-        shell: bash
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.artifact_name }}
-          path: rust/target/${{ matrix.target }}/release/*.a
           if-no-files-found: error
           retention-days: 90
