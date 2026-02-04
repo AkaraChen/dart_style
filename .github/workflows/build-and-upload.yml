@@ -40,7 +40,7 @@ jobs:
       - name: Compile executable
         run: dart compile exe bin/format.dart -o format${{ matrix.exe_suffix }}
       - name: Upload artifact
-        uses: actions/upload-artifact@654c2827b4986b92d6339faa21949e8b06cf9384
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
           path: format${{ matrix.exe_suffix }}
